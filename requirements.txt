@@ -1,0 +1,8 @@
+# Core dependencies
+pygame==2.6.1
+pytest==9.0.2
+
+# Local editable installs (not pip-managed):
+# pip install -e /workspace/IdleGameEngine/
+# PYTHONPATH must include /workspace/glyphforge (no pyproject.toml)
+-e file:///workspace/IdleGameEngine

@@ -74,7 +74,12 @@ class GamePresenter:
 
     def try_purchase(self, element_id: str) -> bool:
         """Attempt to purchase an element. Returns success."""
-        return self.runtime.try_purchase(element_id)
+        result = self.runtime.try_purchase(element_id)
+        if result:
+            # Force immediate rate recompute so UI reflects the change
+            self.runtime._recompute_rates()
+            self.runtime._dirty = False
+        return result
 
     # ── Word/Root/Text queries ───────────────────────────────────────
 

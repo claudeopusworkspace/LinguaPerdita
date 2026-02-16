@@ -45,6 +45,11 @@ class GamePresenter:
         self._new_milestones: list[str] = []
         self._notifications: list[str] = []
 
+        # Auto-unlock the first text (free, no cost)
+        first_text = language.text_list[0]
+        if self.state.element_count(first_text.id) == 0:
+            self.runtime.try_purchase(first_text.id)
+
     @property
     def state(self) -> GameState:
         return self.runtime.get_state()

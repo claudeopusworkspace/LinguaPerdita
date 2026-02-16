@@ -126,12 +126,12 @@ ALPHABET_SIZE = 26
 DEFAULT_SEED = 42
 DEFAULT_PRESET = "runic"
 
-# Glyph counts per word: common=1, others=2
+# Glyph count ranges per word category: (min, max) inclusive
 GLYPHS_PER_WORD = {
-    "common": 1,
-    "everyday": 2,
-    "academic": 2,
-    "rare": 2,
+    "common": (2, 3),
+    "everyday": (3, 4),
+    "academic": (4, 5),
+    "rare": (5, 6),
 }
 
 # ── Pacing targets (for simulation validation) ──────────────────────

@@ -29,15 +29,16 @@ _MEANINGS = {
     "common": [
         "water", "fire", "earth", "sky", "stone", "hand", "eye", "sun",
         "moon", "star", "tree", "river", "path", "door", "light",
+        "bone", "wind", "seed", "salt", "ash",
     ],
     "everyday": [
         "gather", "build", "speak", "listen", "travel", "carry", "break",
         "mend", "trade", "plant", "harvest", "shelter", "guard", "rest",
-        "weave",
+        "weave", "forge", "carve", "kindle", "bind", "honor",
     ],
     "academic": [
         "knowledge", "theorem", "axiom", "paradox", "chronicle", "alchemy",
-        "cipher", "cosmology", "dialectic", "epitome",
+        "cipher", "cosmology", "dialectic", "epitome", "schema", "paradigm",
     ],
     "rare": [
         "transcendence", "apotheosis", "eschatology", "pneuma", "anamnesis",
@@ -126,15 +127,27 @@ def generate_language(seed: int = DEFAULT_SEED) -> LanguageModel:
     # ── Generate words ───────────────────────────────────────────────
     all_words: list[Word] = []
     word_index = 0
+    used_meanings: set[str] = set()
+    used_glyphs: set[tuple[int, ...]] = set()
 
     for category, count in WORDS_PER_CATEGORY.items():
         meanings = list(_MEANINGS[category])
         rng.shuffle(meanings)
         cost_lo, cost_hi = WORD_COST_RANGES[category]
-        glyph_count = GLYPHS_PER_WORD[category]
+        glyph_lo, glyph_hi = GLYPHS_PER_WORD[category]
+
+        # Pick unique meanings for this category
+        unique_meanings: list[str] = []
+        for m in meanings:
+            if m not in used_meanings:
+                unique_meanings.append(m)
+            if len(unique_meanings) == count:
+                break
 
         for i in range(count):
-            meaning = meanings[i % len(meanings)]
+            meaning = unique_meanings[i]
+            used_meanings.add(meaning)
+
             # Spread costs across the range
             if count > 1:
                 t = i / (count - 1)
@@ -142,11 +155,16 @@ def generate_language(seed: int = DEFAULT_SEED) -> LanguageModel:
                 t = 0.5
             base_cost = int(cost_lo + t * (cost_hi - cost_lo))
 
-            # Deterministic glyph assignment
-            glyph_indices = tuple(
-                (word_index * 7 + g * 13) % ALPHABET_SIZE
-                for g in range(glyph_count)
-            )
+            # Generate unique glyph sequence
+            glyph_count = rng.randint(glyph_lo, glyph_hi)
+            for _attempt in range(100):
+                glyph_indices = tuple(
+                    rng.randint(0, ALPHABET_SIZE - 1)
+                    for _ in range(glyph_count)
+                )
+                if glyph_indices not in used_glyphs:
+                    break
+            used_glyphs.add(glyph_indices)
 
             word = Word(
                 id=f"word_{word_index:02d}",

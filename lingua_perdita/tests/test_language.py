@@ -137,3 +137,38 @@ def test_text_unlock_thresholds():
     assert thresholds == sorted(thresholds)
     # First text should be free (threshold 0)
     assert thresholds[0] == 0
+
+
+def test_unique_meanings():
+    """No two words share the same English meaning."""
+    model = generate_language()
+    meanings = [w.meaning for w in model.word_list]
+    assert len(meanings) == len(set(meanings)), f"Duplicate meanings: {[m for m in meanings if meanings.count(m) > 1]}"
+
+
+def test_unique_glyph_sequences():
+    """No two words share the same glyph sequence."""
+    model = generate_language()
+    sequences = [w.glyph_indices for w in model.word_list]
+    assert len(sequences) == len(set(sequences)), "Duplicate glyph sequences found"
+
+
+def test_unique_across_seeds():
+    """Uniqueness guarantees hold across multiple seeds."""
+    for seed in [1, 42, 99, 123, 777]:
+        model = generate_language(seed=seed)
+        meanings = [w.meaning for w in model.word_list]
+        assert len(meanings) == len(set(meanings)), f"Seed {seed}: duplicate meanings"
+        sequences = [w.glyph_indices for w in model.word_list]
+        assert len(sequences) == len(set(sequences)), f"Seed {seed}: duplicate glyphs"
+
+
+def test_glyph_length_ranges():
+    """Words have glyph counts matching their category range."""
+    from lingua_perdita.constants import GLYPHS_PER_WORD
+    model = generate_language()
+    for w in model.word_list:
+        lo, hi = GLYPHS_PER_WORD[w.category]
+        assert lo <= len(w.glyph_indices) <= hi, (
+            f"{w.id} ({w.category}): {len(w.glyph_indices)} glyphs, expected {lo}-{hi}"
+        )

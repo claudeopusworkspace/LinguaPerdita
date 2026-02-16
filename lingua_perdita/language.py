@@ -118,6 +118,10 @@ class LanguageModel:
                 result.append(self.words[wid])
         return result
 
+    def texts_containing_word(self, word_id: str) -> list[Text]:
+        """Return all texts that contain a given word."""
+        return [t for t in self.text_list if word_id in t.word_ids]
+
 
 def generate_language(seed: int = DEFAULT_SEED) -> LanguageModel:
     """Generate a complete LanguageModel from a seed. Deterministic."""
@@ -232,12 +236,14 @@ def generate_language(seed: int = DEFAULT_SEED) -> LanguageModel:
         category = text_categories[ti % len(text_categories)]
 
         # Pick words for this text: bias toward the category but include others
+        # First text uses 60% bias; later texts use 40% for better word coverage
+        bias = 0.6 if ti == 0 else 0.4
         category_words = [w for w in all_words if w.category == category]
         other_words = [w for w in all_words if w.category != category]
 
         text_word_ids: list[str] = []
         for si in range(slot_count):
-            if category_words and (rng.random() < 0.6 or not other_words):
+            if category_words and (rng.random() < bias or not other_words):
                 w = rng.choice(category_words)
             else:
                 w = rng.choice(other_words) if other_words else rng.choice(all_words)
@@ -255,4 +261,73 @@ def generate_language(seed: int = DEFAULT_SEED) -> LanguageModel:
         model.texts[text_id] = text
         model.text_list.append(text)
 
+    # ── Ensure all words appear in at least one text ──────────────
+    all_word_ids_in_texts: set[str] = set()
+    for text in model.text_list:
+        all_word_ids_in_texts.update(text.word_ids)
+
+    orphaned = [w.id for w in all_words if w.id not in all_word_ids_in_texts]
+    if orphaned:
+        rng.shuffle(orphaned)
+        remaining = list(orphaned)
+
+        # Pass 1: replace within-text duplicates
+        for ti, text in enumerate(model.text_list):
+            if not remaining:
+                break
+            word_counts: dict[str, list[int]] = {}
+            for idx, wid in enumerate(text.word_ids):
+                word_counts.setdefault(wid, []).append(idx)
+
+            replaceable = []
+            for wid, indices in word_counts.items():
+                if len(indices) > 1:
+                    replaceable.extend(indices[1:])
+
+            word_ids = list(text.word_ids)
+            for slot_idx in replaceable:
+                if not remaining:
+                    break
+                word_ids[slot_idx] = remaining.pop()
+            _update_text(model, ti, text, tuple(word_ids))
+
+        # Pass 2: replace cross-text duplicates (words in multiple texts)
+        if remaining:
+            # Count how many texts each word appears in
+            word_text_count: dict[str, int] = {}
+            for text in model.text_list:
+                for wid in set(text.word_ids):
+                    word_text_count[wid] = word_text_count.get(wid, 0) + 1
+
+            for ti, text in enumerate(model.text_list):
+                if not remaining:
+                    break
+                word_ids = list(text.word_ids)
+                for slot_idx, wid in enumerate(word_ids):
+                    if not remaining:
+                        break
+                    if word_text_count.get(wid, 0) > 1:
+                        orphan_wid = remaining.pop()
+                        word_text_count[wid] -= 1
+                        word_text_count[orphan_wid] = word_text_count.get(orphan_wid, 0) + 1
+                        word_ids[slot_idx] = orphan_wid
+                _update_text(model, ti, text, tuple(word_ids))
+
     return model
+
+
+def _update_text(
+    model: LanguageModel, idx: int, old_text: Text, new_word_ids: tuple[str, ...],
+) -> None:
+    """Replace a text in the model with updated word_ids."""
+    if new_word_ids == old_text.word_ids:
+        return
+    new_text = Text(
+        id=old_text.id,
+        display_name=old_text.display_name,
+        word_ids=new_word_ids,
+        category=old_text.category,
+        unlock_threshold=old_text.unlock_threshold,
+    )
+    model.texts[old_text.id] = new_text
+    model.text_list[idx] = new_text

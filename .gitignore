@@ -27,3 +27,6 @@ saves/
 
 # PyGame
 *.pyc
+
+# Playtest notes
+playtest*.md

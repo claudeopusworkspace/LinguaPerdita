@@ -50,6 +50,12 @@ class GamePresenter:
         if self.state.element_count(first_text.id) == 0:
             self.runtime.try_purchase(first_text.id)
 
+        # Auto-grant word knowledge bonus (hidden, free)
+        if self.state.element_count("word_knowledge_bonus") == 0:
+            es = self.state.elements.get("word_knowledge_bonus")
+            if es is not None:
+                es.count = 1
+
     @property
     def state(self) -> GameState:
         return self.runtime.get_state()
@@ -74,12 +80,7 @@ class GamePresenter:
 
     def try_purchase(self, element_id: str) -> bool:
         """Attempt to purchase an element. Returns success."""
-        result = self.runtime.try_purchase(element_id)
-        if result:
-            # Force immediate rate recompute so UI reflects the change
-            self.runtime._recompute_rates()
-            self.runtime._dirty = False
-        return result
+        return self.runtime.try_purchase(element_id)
 
     # ── Word/Root/Text queries ───────────────────────────────────────
 
@@ -121,6 +122,14 @@ class GamePresenter:
         """Total unique words in this text."""
         text = self.language.texts[text_id]
         return len(set(text.word_ids))
+
+    def word_text_membership(self, word_id: str) -> list[tuple[str, str, bool]]:
+        """Return texts containing a word: [(text_id, display_name, is_unlocked)]."""
+        texts = self.language.texts_containing_word(word_id)
+        return [
+            (t.id, t.display_name, self.is_text_unlocked(t.id))
+            for t in texts
+        ]
 
     # ── Shop queries ─────────────────────────────────────────────────
 

@@ -370,6 +370,15 @@ class ShopScreen(Screen):
                 root_text = info_font.render(f"Root: {root.display_name} (30% off)", True, CYAN_DIM)
                 r.surface.blit(root_text, (row_rect.x + 60, row_rect.y + 24))
 
+            # Show text membership
+            membership = presenter.word_text_membership(word.id)
+            if membership:
+                parts = []
+                for _tid, name, unlocked in membership:
+                    parts.append(name if unlocked else "???")
+                in_text = info_font.render(f"In: {', '.join(parts)}", True, TEXT_DIM)
+                r.surface.blit(in_text, (row_rect.x + 60, row_rect.y + 38))
+
             self._item_rects.append((row_rect, word.id))
             y += 60
 

@@ -65,7 +65,7 @@ UPGRADES = [
         "id": "upg_click_boost",
         "name": "Sharper Instinct",
         "description": "Clicking yields +2 more Insight",
-        "cost": 400,
+        "cost": 350,
         "effect_type": "CLICK_FLAT",
         "effect_value": 2.0,
     },
@@ -73,7 +73,7 @@ UPGRADES = [
         "id": "upg_click_mult",
         "name": "Eureka Moments",
         "description": "Clicking yields 2x Insight",
-        "cost": 4000,
+        "cost": 1500,
         "effect_type": "CLICK_MULT",
         "effect_value": 2.0,
     },
@@ -86,10 +86,26 @@ UPGRADES = [
         "effect_value": 0.25,
     },
     {
+        "id": "upg_linguistic_intuition",
+        "name": "Linguistic Intuition",
+        "description": "+15% Insight production",
+        "cost": 5000,
+        "effect_type": "PRODUCTION_ADD_PCT",
+        "effect_value": 0.15,
+    },
+    {
+        "id": "upg_cross_reference",
+        "name": "Cross-Reference Method",
+        "description": "+10% Insight production",
+        "cost": 8500,
+        "effect_type": "PRODUCTION_ADD_PCT",
+        "effect_value": 0.10,
+    },
+    {
         "id": "upg_text_efficiency",
         "name": "Contextual Analysis",
         "description": "+50% Insight from translated texts",
-        "cost": 12000,
+        "cost": 10000,
         "effect_type": "TEXT_EFFICIENCY",
         "effect_value": 1.5,
     },
@@ -97,7 +113,7 @@ UPGRADES = [
         "id": "upg_study_focus",
         "name": "Deep Study",
         "description": "Clicking yields 3x Insight",
-        "cost": 25000,
+        "cost": 8000,
         "effect_type": "CLICK_MULT",
         "effect_value": 3.0,
     },
@@ -115,7 +131,8 @@ ROOT_COST_MULTIPLIER = 0.7    # 30% discount on related words
 TEXT_COUNT = 4
 TEXT_WORD_SLOTS_RANGE = (8, 12)  # words per text (with repetition)
 INSIGHT_PER_TRANSLATED_WORD = 1.5  # Insight/s per translated word in a text
-TEXT_EFFICIENCY_MULT = 1.0  # multiplied by upg_text_efficiency
+TEXT_EFFICIENCY_MULT = 1.5  # multiplied by upg_text_efficiency
+WORD_BASE_INSIGHT_RATE = 0.1  # passive Insight/s per translated word
 
 # Text unlock thresholds (total words translated)
 TEXT_UNLOCK_THRESHOLDS = [0, 5, 12, 20]

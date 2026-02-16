@@ -27,6 +27,7 @@ from lingua_perdita.constants import (
     TEXT_EFFICIENCY_MULT,
     TOOLS,
     UPGRADES,
+    WORD_BASE_INSIGHT_RATE,
 )
 from lingua_perdita.language import LanguageModel
 
@@ -192,6 +193,28 @@ def build_definition(language: LanguageModel) -> GameDefinition:
             category="text",
             tags={"text"},
         ))
+
+    # ── Word knowledge bonus (hidden, auto-purchased) ───────────────
+    def _word_knowledge_value(state: GameState, lang=language) -> float:
+        """Passive Insight/s based on total translated words."""
+        count = sum(1 for w in lang.word_list if state.element_count(w.id) >= 1)
+        return count * WORD_BASE_INSIGHT_RATE
+
+    elements.append(ElementDef(
+        id="word_knowledge_bonus",
+        display_name="Word Knowledge",
+        description="Passive Insight from translated words",
+        base_cost={},
+        max_count=1,
+        effects=[EffectDef(
+            type=EffectType.PRODUCTION_FLAT,
+            target="insight",
+            value=_word_knowledge_value,
+        )],
+        requirements=[Req.custom(lambda s: False)],  # never purchasable directly
+        category="bonus",
+        tags={"bonus", "hidden"},
+    ))
 
     # ── Milestones ───────────────────────────────────────────────────
 

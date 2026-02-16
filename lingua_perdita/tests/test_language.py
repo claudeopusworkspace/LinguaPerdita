@@ -172,3 +172,31 @@ def test_glyph_length_ranges():
         assert lo <= len(w.glyph_indices) <= hi, (
             f"{w.id} ({w.category}): {len(w.glyph_indices)} glyphs, expected {lo}-{hi}"
         )
+
+
+def test_all_words_in_at_least_one_text():
+    """Every word appears in at least one text (no dead purchases)."""
+    for seed in [1, 42, 99, 123, 777]:
+        model = generate_language(seed=seed)
+        words_in_texts: set[str] = set()
+        for text in model.text_list:
+            words_in_texts.update(text.word_ids)
+        for w in model.word_list:
+            assert w.id in words_in_texts, (
+                f"Seed {seed}: word {w.id} ({w.meaning}) not in any text"
+            )
+
+
+def test_texts_containing_word():
+    """texts_containing_word returns correct texts."""
+    model = generate_language()
+    for word in model.word_list:
+        texts = model.texts_containing_word(word.id)
+        for text in texts:
+            assert word.id in text.word_ids
+        # Verify completeness
+        for text in model.text_list:
+            if word.id in text.word_ids:
+                assert text in texts, (
+                    f"Word {word.id} in {text.id} but not returned"
+                )

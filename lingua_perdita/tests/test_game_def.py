@@ -164,3 +164,49 @@ def test_root_discovery_grants_discount():
 
     # Discount element should be granted
     assert runtime.state.element_count(discount_id) == 1
+
+
+def test_text_efficiency_upgrade():
+    """Contextual Analysis upgrade increases text production."""
+    runtime, language, _ = _make_runtime()
+    runtime.state.currencies["insight"].current = 1_000_000.0
+
+    # Buy first text and translate a word in it
+    first_text = language.text_list[0]
+    runtime.try_purchase(first_text.id)
+    runtime.try_purchase(first_text.word_ids[0])
+    runtime.tick(1.0)
+    rate_before = runtime.state.currency_rate("insight")
+
+    # Buy the text efficiency upgrade
+    runtime.try_purchase("upg_text_efficiency")
+    runtime.tick(1.0)
+    rate_after = runtime.state.currency_rate("insight")
+
+    assert rate_after > rate_before, (
+        f"Text efficiency upgrade should increase rate: {rate_before} -> {rate_after}"
+    )
+
+
+def test_word_knowledge_bonus():
+    """Word knowledge bonus gives passive Insight per translated word."""
+    runtime, language, _ = _make_runtime()
+    runtime.state.currencies["insight"].current = 1_000_000.0
+
+    # Grant the hidden bonus element
+    es = runtime.state.elements.get("word_knowledge_bonus")
+    assert es is not None, "word_knowledge_bonus element missing"
+    es.count = 1
+
+    # No words translated yet
+    runtime.tick(1.0)
+    rate_zero = runtime.state.currency_rate("insight")
+
+    # Translate a word
+    runtime.try_purchase(language.word_list[0].id)
+    runtime.tick(1.0)
+    rate_one = runtime.state.currency_rate("insight")
+
+    assert rate_one > rate_zero, (
+        f"Translating a word should increase rate via knowledge bonus: {rate_zero} -> {rate_one}"
+    )

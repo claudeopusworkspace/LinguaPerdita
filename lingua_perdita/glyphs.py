@@ -6,12 +6,10 @@ and word sequences as cached pygame Surfaces.
 
 from __future__ import annotations
 
-import sys
 from typing import Sequence
 
 import pygame
 
-sys.path.insert(0, "/workspace/glyphforge")
 import glyphforge
 from glyphforge.alphabet import Alphabet
 from glyphforge.glyph import Glyph

@@ -2,7 +2,6 @@
 pygame==2.6.1
 pytest==9.0.2
 
-# Local editable installs (not pip-managed):
-# pip install -e /workspace/IdleGameEngine/
-# PYTHONPATH must include /workspace/glyphforge (no pyproject.toml)
--e file:///workspace/IdleGameEngine
+# Game engine and glyph rendering
+idleengine @ git+https://github.com/claudeopusworkspace/IdleGameEngine.git@master
+glyphforge @ git+https://github.com/claudeopusworkspace/glyphforge.git@main

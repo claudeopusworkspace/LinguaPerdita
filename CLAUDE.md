@@ -6,8 +6,8 @@ Part of RapidFireGames — fail-fast methodology: validate economy via simulatio
 
 ## Stack
 - **Python 3.x** with PyGame for rendering
-- **IdleGameEngine** (`/workspace/IdleGameEngine/`) — installed editable, provides GameDefinition/GameRuntime/Simulation
-- **GlyphForge** (`/workspace/glyphforge/`) — installed editable, procedural glyph generation
+- **IdleGameEngine** (https://github.com/claudeopusworkspace/IdleGameEngine) — provides GameDefinition/GameRuntime/Simulation
+- **GlyphForge** (https://github.com/claudeopusworkspace/glyphforge) — procedural glyph generation
 
 ## Project Structure
 ```

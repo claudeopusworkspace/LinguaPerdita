@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import sys
-
 import pygame
-
-sys.path.insert(0, "/workspace/glyphforge")
 
 from lingua_perdita.constants import DEFAULT_PRESET, DEFAULT_SEED
 from lingua_perdita.glyphs import GlyphRenderer

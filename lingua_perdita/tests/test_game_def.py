@@ -97,8 +97,8 @@ def test_purchase_word():
     """Can purchase a cheap word when we have enough insight."""
     runtime, language, _ = _make_runtime()
 
-    # Give ourselves some insight
-    runtime.state.currencies["insight"].current = 50.0
+    # Give ourselves enough insight for the cheapest word
+    runtime.state.currencies["insight"].current = 500.0
 
     # Buy the cheapest word
     cheapest = language.word_list[0]
@@ -111,8 +111,8 @@ def test_purchase_tool():
     """Can purchase a tool and it produces insight."""
     runtime, _, _ = _make_runtime()
 
-    # Give insight
-    runtime.state.currencies["insight"].current = 100.0
+    # Give enough insight for a worn dictionary
+    runtime.state.currencies["insight"].current = 500.0
 
     result = runtime.try_purchase("worn_dictionary")
     assert result is True

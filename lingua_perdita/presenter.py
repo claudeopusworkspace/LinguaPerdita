@@ -59,7 +59,14 @@ class GamePresenter:
     def tick(self, delta: float) -> None:
         """Advance game time and check for new milestones."""
         self.runtime.tick(delta)
+        self._auto_unlock_texts()
         self._check_new_milestones()
+
+    def _auto_unlock_texts(self) -> None:
+        """Auto-purchase texts whose requirements are met (they cost 0)."""
+        for text in self.language.text_list:
+            if self.state.element_count(text.id) == 0:
+                self.runtime.try_purchase(text.id)
 
     def process_click(self) -> float:
         """Process a player click on the tablet. Returns Insight earned."""

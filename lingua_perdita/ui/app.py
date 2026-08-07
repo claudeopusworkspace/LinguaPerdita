@@ -97,6 +97,11 @@ class App:
         # Auto-save timer
         self._autosave_timer: float = 60.0
 
+        # Auto-click (toggle with F1): ~5 clicks/sec
+        self._auto_click: bool = False
+        self._auto_click_acc: float = 0.0
+        self._auto_click_interval: float = 0.2  # seconds between clicks
+
     def run(self) -> None:
         """Main loop."""
         while self.running:
@@ -133,6 +138,14 @@ class App:
                     continue
                 if event.key == pygame.K_3:
                     self.active_screen = 2
+                    continue
+
+                # F1: toggle auto-click
+                if event.key == pygame.K_F1:
+                    self._auto_click = not self._auto_click
+                    self._auto_click_acc = 0.0
+                    state = "ON" if self._auto_click else "OFF"
+                    self._notifications.append((f"Auto-click {state}", NOTIF_DURATION, NOTIF_INFO))
                     continue
 
                 # Ctrl+S save
@@ -180,6 +193,13 @@ class App:
             for msg, remaining, ntype in self._notifications
             if remaining - dt > 0
         ]
+
+        # Auto-click
+        if self._auto_click:
+            self._auto_click_acc += dt
+            while self._auto_click_acc >= self._auto_click_interval:
+                self.presenter.process_click()
+                self._auto_click_acc -= self._auto_click_interval
 
         # Auto-save
         self._autosave_timer -= dt
@@ -264,7 +284,8 @@ class App:
         self.renderer.hline(0, y, SCREEN_W, BORDER)
 
         font = get_font(FONT_SIZE_TINY)
-        help_text = "TAB/1-3: Switch  |  CLICK: Insight/Buy  |  SCROLL: Navigate  |  CTRL+S: Save  |  ESC: Quit"
+        auto_label = "F1: Auto-click[ON]" if self._auto_click else "F1: Auto-click"
+        help_text = f"TAB/1-3: Switch  |  CLICK: Insight/Buy  |  SCROLL: Navigate  |  {auto_label}  |  CTRL+S: Save  |  ESC: Quit"
         rendered = font.render(help_text, True, TEXT_DIM)
         self.screen.blit(rendered, (PADDING, y + 8))
 
